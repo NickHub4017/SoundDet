@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+   
+	<script type="text/javascript" src="jscharts.js"></script>
+	<script type="text/javascript" src="jquery.js"></script>
+      <script type="text/javascript">
+	  var j=0;
+	  var myAllData = new Array();
+         function WebSocketTest()
+         {
+            if ("WebSocket" in window)
+            {
+               alert("WebSocket is supported by your Browser!");
+               
+               // Let us open a web socket
+               var ws = new WebSocket("ws://localhost:9000");
+				
+               ws.onopen = function()
+               {
+                  // Web Socket is connected, send data using send()
+                  ws.send("Login A");
+                  //alert("Message is sent...");
+               };
+				
+               ws.onmessage = function (evt) 
+               { 
+				var received_msg = evt.data;
+				var jsonobstr=received_msg.replace("A ", "");
+				if(received_msg=="Login A"|| received_msg=="Login B"){
+				return;
+				}
+//				jsonob=JSON.parse(jsonobstr).JSChart.datasets[0].data;
+				jsonob=JSON.parse(jsonobstr);
+				var date = new Date(jsonob.time*1000);
+				$("#curtime").text(date);
+				//console.log(jsonobstr)
+				var myData = new Array();
+				//var i=0;
+				var temphz=0;
+				var realhzval=0;
+				$.each( jsonob.ydata, function( key, value ) {
+						myData.push([jsonob.xdata[key],value]);
+						if(temphz<value){
+						temphz=value;
+						realhzval=key;
+						}
+						//i=i+1;
+						//var mytempData = new Array(value.value,value.value);
+					//	myAllData.push([value.unit+j,value.value]);
+						
+							});
+				$("#maxhz").text(realhzval+" Hz (max peak)");
+						
+
+
+				var myChart = new JSChart('chartcontainer', 'line');
+				//console.log( myData);
+				myChart.setDataArray(myData);
+				myChart.setLineSpeed(100);
+				myChart.resize(800, 600);
+				myChart.setBarValues(true)
+				myChart.draw();
+
+				
+				var myChart = new JSChart('chartcontainerall', 'line');
+				//console.log( myData);
+				if(myAllData.length>100){
+				myAllData=myAllData.slice(myAllData.length-101, myAllData.length-1);
+				}
+				//myChart.setDataArray(myAllData);
+				//myChart.setLineSpeed(100);
+				//myChart.resize(800, 600);
+				//myChart.draw();
+
+				j=j+5;
+               };
+				
+               ws.onclose = function()
+               { 
+                  // websocket is closed.
+                  alert("Connection is closed..."); 
+               };
+            }
+            
+            else
+            {
+               // The browser doesn't support WebSocket
+               alert("WebSocket NOT supported by your Browser!");
+            }
+         }
+      </script>
+		
+   </head>
+   <body>
+   
+      <button id="sse">
+         <a href="javascript:WebSocketTest()">Run WebSocket</a>
+      </button>
+	  <h4 id="curtime"></h4>
+	  <h3 id="maxhz"></h3>
+	  <div id="chartcontainer">This is just a replacement in case Javascript is not available or used for SEO purposes</div>
+Fig. 1.2 - Container example
+      
+	  <div id="chartcontainerall">This is just a replacement in case Javascript is not available or used for SEO purposes</div>
+Fig. 1.2 - Container example
+   </body>
+</html>
